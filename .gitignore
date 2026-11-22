@@ -1,0 +1,16 @@
+# Build artifacts & compiled bundles
+build/
+CM716FX.app/
+*.iconset/
+*.zip
+*.dmg
+
+# macOS Finder & IDE clutter
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+.vscode/
+.swiftpm/
+*.xcuserdata

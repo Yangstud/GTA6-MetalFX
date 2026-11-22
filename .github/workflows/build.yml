@@ -1,0 +1,39 @@
+name: Build Universal macOS App
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show toolchain info
+        run: |
+          sw_vers
+          swift --version
+          xcrun --show-sdk-version
+
+      - name: Build Universal 2 CM716FX.app (arm64 + x86_64)
+        run: |
+          chmod +x build_app.sh
+          # Build binary & app bundle (skip GPU self-test on headless CI VM without physical GPU)
+          sed -i '' 's|"$MACOS_DIR/CM716FX" --self-test|echo "CI build OK (GPU self-test skipped on headless runner)"|' build_app.sh
+          ./build_app.sh
+          lipo -info CM716FX.app/Contents/MacOS/CM716FX
+
+      - name: Package CM716FX-macOS-Universal.zip
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent CM716FX.app CM716FX-macOS-Universal.zip
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CM716FX-macOS-Universal
+          path: CM716FX-macOS-Universal.zip
